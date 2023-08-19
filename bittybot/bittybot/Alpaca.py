@@ -1,8 +1,13 @@
+import datetime
+import json
 import os
+import pickle
 from alpaca.data.requests import CryptoBarsRequest
 from alpaca.data.timeframe import TimeFrame
 from alpaca.data.live import CryptoDataStream
 import requests
+import pandas as pd
+import numpy as np
 
 API_KEY = os.getenv("API-KEY")
 SECRET_KEY = os.getenv("SECRET-KEY")
@@ -10,9 +15,63 @@ SECRET_KEY = os.getenv("SECRET-KEY")
 baseURL = "https://paper-api.alpaca.markets"
 accountURL = "{}/v2/account".format(baseURL)
 
-btcBarsURL = "https://data.alpaca.markets/v1beta3/crypto/us/latest/bars"
+predictors = []
 
-r = requests.get(btcBarsURL, headers={'APCA-API-KEY-ID': API_KEY, 'APCA-API-SECRET-KEY': SECRET_KEY}, params={"symbols":"BTC/USD"})
+btcBarsURL = "https://data.alpaca.markets/v1beta3/crypto/us/bars"
 
-print(r.content)
+r = requests.get(
+    btcBarsURL,
+    headers={"APCA-API-KEY-ID": API_KEY, "APCA-API-SECRET-KEY": SECRET_KEY},
+    params={"symbols": "BTC/USD", "timeframe": "1Min", "sort": "desc"},
+)
 
+def getCurrentBTC():
+    btcBarsURL = "https://data.alpaca.markets/v1beta3/crypto/us/bars"
+
+    r = requests.get(
+    btcBarsURL,
+    headers={"APCA-API-KEY-ID": API_KEY, "APCA-API-SECRET-KEY": SECRET_KEY},
+    params={"symbols": "BTC/USD", "timeframe": "1Min", "sort": "desc"},
+).json()
+    
+    btcData = r["bars"]["BTC/USD"]
+    df = pd.DataFrame(btcData)
+    df['t'] = pd.to_datetime(df['t'])
+    df.set_index('t', inplace=True)
+    df["next_minute"] = df["c"].shift(-1)
+    df['Up'] = (df["c"] < df["next_minute"]).astype(int)
+    df = df.dropna()
+    df = df.sort_values(by='t', ascending=True)
+    return df
+
+def getRollingAvgs(data):
+    horizons = [1,3,5,20,60]
+
+    for horizon in horizons:
+        rolling_averages = data.rolling(horizon).mean()
+        
+        ratio_column = f"Close_Ratio_{horizon}"
+        data[ratio_column] = data["c"] / rolling_averages["c"]
+        
+        trend_column = f"Trend_{horizon}"
+        
+        data[trend_column] = data.shift(1).rolling(horizon).sum()["Up"]
+        global predictors
+        predictors += [ratio_column, trend_column]
+    return data[-60:]
+
+def makePrediction():
+    
+    data = getCurrentBTC()
+    data = getRollingAvgs(data)
+    with open('bittybotV1.pkl', 'rb') as file:
+        model = pickle.load(file)
+    
+    preds = model.predict_proba(data[predictors])[:,1]
+    preds[preds >= .65] = 1
+    preds[preds < .65] = 0
+    preds = pd.Series(preds, index=data.index, name="Predictions")
+    return preds.iloc[[-1]]
+    
+
+print(makePrediction())
