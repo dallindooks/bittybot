@@ -5,12 +5,16 @@ import pickle
 from alpaca.data.requests import CryptoBarsRequest
 from alpaca.data.timeframe import TimeFrame
 from alpaca.data.live import CryptoDataStream
+import dotenv
 import requests
 import pandas as pd
 import numpy as np
+from dotenv import load_dotenv
 
 API_KEY = os.getenv("API-KEY")
 SECRET_KEY = os.getenv("SECRET-KEY")
+
+dotenv.load_dotenv()
 
 baseURL = "https://paper-api.alpaca.markets"
 accountURL = "{}/v2/account".format(baseURL)
@@ -64,9 +68,17 @@ def makePrediction():
     
     data = getCurrentBTC()
     data = getRollingAvgs(data)
-    with open('bittybotV1.pkl', 'rb') as file:
-        model = pickle.load(file)
     
+    modelLink = os.environ.get('CURRENT_MODEL')
+    
+    with open(modelLink, 'rb') as file:
+        model = pickle.load(file)
+        
+    model.fit(data[predictors], data["Up"])
+    
+    with open(modelLink, 'wb') as file:
+        pickle.dump(model, file)
+
     preds = model.predict_proba(data[predictors])[:,1]
     preds[preds >= .65] = 1
     preds[preds < .65] = 0

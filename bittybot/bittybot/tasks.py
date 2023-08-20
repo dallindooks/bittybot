@@ -1,0 +1,4 @@
+
+
+def predictAndTrade():
+    print("cool")
