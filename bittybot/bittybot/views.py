@@ -25,4 +25,4 @@ class startBot(APIView):
 class killBot(APIView):
     def post(self, request, format=None):
         pause()
-        return Response("Bot Started", status=status.HTTP_202_ACCEPTED)
+        return Response("Bot Paused", status=status.HTTP_202_ACCEPTED)

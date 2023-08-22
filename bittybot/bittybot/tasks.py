@@ -10,8 +10,12 @@ def predictAndTrade():
 
 def start():
     global scheduler
-    scheduler.add_job(predictAndTrade, 'interval', minutes=0.05, id='predictAndTrade')
-    scheduler.start()
+    job = scheduler.get_job("predictAndTrade")
+    if job:
+        scheduler.resume()
+    else:
+        scheduler.add_job(predictAndTrade, 'interval', minutes=0.05, id='predictAndTrade')
+        scheduler.start()
     
 def pause():
     global scheduler

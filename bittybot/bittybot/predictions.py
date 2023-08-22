@@ -68,7 +68,6 @@ def makePrediction():
     
     data = getCurrentBTC()
     data = getRollingAvgs(data)
-    
     modelLink = os.environ.get('CURRENT_MODEL')
     
     with open(modelLink, 'rb') as file:
