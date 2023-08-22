@@ -80,10 +80,5 @@ def makePrediction():
         pickle.dump(model, file)
 
     preds = model.predict_proba(data[predictors])[:,1]
-    preds[preds >= .65] = 1
-    preds[preds < .65] = 0
-    preds = pd.Series(preds, index=data.index, name="Predictions")
-    return preds.iloc[[-1]]
+    return preds[0]
     
-
-print(makePrediction())
