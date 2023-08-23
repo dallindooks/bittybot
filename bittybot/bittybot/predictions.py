@@ -11,8 +11,8 @@ import pandas as pd
 import numpy as np
 from dotenv import load_dotenv
 
-API_KEY = os.getenv("API-KEY")
-SECRET_KEY = os.getenv("SECRET-KEY")
+API_KEY = os.getenv("API_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 dotenv.load_dotenv()
 
@@ -22,12 +22,6 @@ accountURL = "{}/v2/account".format(baseURL)
 predictors = []
 
 btcBarsURL = "https://data.alpaca.markets/v1beta3/crypto/us/bars"
-
-r = requests.get(
-    btcBarsURL,
-    headers={"APCA-API-KEY-ID": API_KEY, "APCA-API-SECRET-KEY": SECRET_KEY},
-    params={"symbols": "BTC/USD", "timeframe": "1Min", "sort": "desc"},
-)
 
 def getCurrentBTC():
     btcBarsURL = "https://data.alpaca.markets/v1beta3/crypto/us/bars"
