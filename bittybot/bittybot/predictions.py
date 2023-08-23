@@ -11,8 +11,8 @@ import pandas as pd
 import numpy as np
 from dotenv import load_dotenv
 
-API_KEY = os.getenv("API-KEY")
-SECRET_KEY = os.getenv("SECRET-KEY")
+API_KEY = os.getenv("API_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 dotenv.load_dotenv()
 
@@ -22,12 +22,6 @@ accountURL = "{}/v2/account".format(baseURL)
 predictors = []
 
 btcBarsURL = "https://data.alpaca.markets/v1beta3/crypto/us/bars"
-
-r = requests.get(
-    btcBarsURL,
-    headers={"APCA-API-KEY-ID": API_KEY, "APCA-API-SECRET-KEY": SECRET_KEY},
-    params={"symbols": "BTC/USD", "timeframe": "1Min", "sort": "desc"},
-)
 
 def getCurrentBTC():
     btcBarsURL = "https://data.alpaca.markets/v1beta3/crypto/us/bars"
@@ -50,7 +44,8 @@ def getCurrentBTC():
 
 def getRollingAvgs(data):
     horizons = [1,3,5,20,60]
-
+    global predictors
+    predictors = []
     for horizon in horizons:
         rolling_averages = data.rolling(horizon).mean()
         
@@ -60,30 +55,24 @@ def getRollingAvgs(data):
         trend_column = f"Trend_{horizon}"
         
         data[trend_column] = data.shift(1).rolling(horizon).sum()["Up"]
-        global predictors
         predictors += [ratio_column, trend_column]
+        
     return data[-60:]
 
 def makePrediction():
     
     data = getCurrentBTC()
     data = getRollingAvgs(data)
-    
     modelLink = os.environ.get('CURRENT_MODEL')
     
     with open(modelLink, 'rb') as file:
         model = pickle.load(file)
-        
-    model.fit(data[predictors], data["Up"])
-    
-    with open(modelLink, 'wb') as file:
-        pickle.dump(model, file)
-
     preds = model.predict_proba(data[predictors])[:,1]
-    preds[preds >= .65] = 1
-    preds[preds < .65] = 0
+    
+    # model.fit(data[predictors], data["Up"])
+    
+    # with open(modelLink, 'wb') as file:
+    #     pickle.dump(model, file)
     preds = pd.Series(preds, index=data.index, name="Predictions")
     return preds.iloc[[-1]]
     
-
-print(makePrediction())

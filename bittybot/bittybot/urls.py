@@ -17,8 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from bittybot import views
+from .views import killBot, startBot
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('startBot/', startBot.as_view(), name='startBot'),
+    path('killBot/', killBot.as_view(), name='killBot')
 ]
