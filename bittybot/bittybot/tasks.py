@@ -1,3 +1,4 @@
+from .trades import evaluatePrediction
 from .predictions import makePrediction
 import asyncio
 from apscheduler.schedulers.blocking import BlockingScheduler
@@ -5,7 +6,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 scheduler = BlockingScheduler()
 
 def predictAndTrade():
-    print(makePrediction())
+    print(evaluatePrediction(makePrediction()))
 
 
 def start():
@@ -14,7 +15,7 @@ def start():
     if job:
         scheduler.resume()
     else:
-        scheduler.add_job(predictAndTrade, 'interval', minutes=0.05, id='predictAndTrade')
+        scheduler.add_job(predictAndTrade, 'interval', minutes=1, id='predictAndTrade')
         scheduler.start()
     
 def pause():

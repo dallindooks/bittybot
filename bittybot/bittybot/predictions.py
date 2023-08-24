@@ -67,12 +67,18 @@ def makePrediction():
     
     with open(modelLink, 'rb') as file:
         model = pickle.load(file)
+        
     preds = model.predict_proba(data[predictors])[:,1]
     
-    # model.fit(data[predictors], data["Up"])
-    
-    # with open(modelLink, 'wb') as file:
-    #     pickle.dump(model, file)
     preds = pd.Series(preds, index=data.index, name="Predictions")
+    print(preds)
+    
+    fiveMinAgo = data.iloc[[-15]]
+    model.fit(fiveMinAgo[predictors], fiveMinAgo["Up"])
+    
+    with open(modelLink, 'wb') as file:
+        pickle.dump(model, file)
     return preds.iloc[[-1]]
+
+makePrediction()
     
