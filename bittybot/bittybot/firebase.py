@@ -4,6 +4,7 @@ import os
 config = {
   "apiKey": "AIzaSyClIzSDGqO-TK2CQxwqXJ0Oas84o4IOKRc",
   "authDomain": "bittybot-778dc.firebaseapp.com",
+  "databaseURL": "https://bittybot-778dc-default-rtdb.firebaseio.com",
   "projectId": "bittybot-778dc",
   "storageBucket": "bittybot-778dc.appspot.com",
   "messagingSenderId": "376729658832",
@@ -11,5 +12,8 @@ config = {
   "measurementId": "G-X35MWPZPPN"
 }
 
-firebase = pyrebase.initialize_app(config)
-db = firebase.database()
+def getDb():
+  global config
+  firebase = pyrebase.initialize_app(config)
+  db = firebase.database()
+  return db

@@ -33,13 +33,28 @@ def getCurrentBTC():
 ).json()
     
     btcData = r["bars"]["BTC/USD"]
+    
+    column_mapping = {
+    'h': "High",
+    "o": "Open",
+    "l": "Low",
+    "c": "Close",
+    "v": "Volume_(BTC)",
+    't': 'Timestamp'
+    }
+    
     df = pd.DataFrame(btcData)
-    df['t'] = pd.to_datetime(df['t'])
-    df.set_index('t', inplace=True)
-    df["next_minute"] = df["c"].shift(-1)
-    df['Up'] = (df["c"] < df["next_minute"]).astype(int)
+    
+    df.rename(columns=column_mapping, inplace=True)
+    
+    df.reset_index(drop=True)
+    df.set_index("Timestamp", inplace=True)
+    df.index = pd.to_datetime(df.index, format='%Y-%m-%dT%H:%M:%SZ')
+    
+    df["next_minute"] = df["Close"].shift(-1)
+    df['Up'] = (df["Close"] < df["next_minute"]).astype(int)
     df = df.dropna()
-    df = df.sort_values(by='t', ascending=True)
+    df = df.sort_values(by='Timestamp', ascending=True)
     return df
 
 def getRollingAvgs(data):

@@ -4,6 +4,7 @@ import os
 import dotenv
 import requests
 from dotenv import load_dotenv
+from .firebase import getDb
 
 dotenv.load_dotenv()
 accountUrl = os.environ.get('GET_ACCOUNT_URL')
@@ -19,15 +20,18 @@ def evaluatePrediction(prediction):
     
     predValue = prediction[0]
     
-    if (predValue > .55):
+    last_trade = getLastTradeData()
+    
+    if (predValue > .525):
         return buyBTC()
-    elif (predValue < .4):
+    elif (predValue < .475):
         return sellBTC()
+    else: 
+        return sellBTC if last_trade["side"] == "sell" else buyBTC()
     
 def buyBTC():
     
     global tradeUrl
-    # print(amount)
     
     try:
         cash = float(getCurrentCash())
@@ -49,7 +53,11 @@ def buyBTC():
         }
         
         buyCallResponse = requests.post(tradeUrl, json=payload, headers=headers)
+        
         buyCallResponse.raise_for_status()
+        
+        logTradeData(buyCallResponse)
+        
         return Response("BTC Bought ", status=status.HTTP_200_OK)
     
     except requests.exceptions.RequestException as e:
@@ -77,8 +85,12 @@ def sellBTC():
                 "APCA-API-SECRET-KEY": secretKey
         }
         
-        buyCallResponse = requests.post(tradeUrl, json=payload, headers=headers)
-        buyCallResponse.raise_for_status()
+        sellCallResponse = requests.post(tradeUrl, json=payload, headers=headers)
+        
+        sellCallResponse.raise_for_status()
+        
+        logTradeData(sellCallResponse)
+        
         return Response("BTC Sold ", status=status.HTTP_200_OK)
     
     except requests.exceptions.RequestException as e:
@@ -116,3 +128,36 @@ def getCurrBTCPosition():
     cash = quantity * price
     
     return round(cash, 2)
+
+def logTradeData(response):
+    json_response = response.json()
+    
+    dollarAmount = json_response["notional"]
+    timeSubmitted = json_response["submitted_at"]
+    side = json_response["side"]
+    
+    data = {
+        "quantity" : dollarAmount,
+        "time" : timeSubmitted,
+        "side" : side
+    }
+    
+    db = getDb()
+    
+    db.child("trades").push(data)
+    
+def getLastTradeData():
+    
+    db = getDb()
+    trades_ref = db.child("trades")
+    
+    data = trades_ref.get().val()
+    
+    keys = list(data.keys())
+    
+    last_key = keys[-1]
+    
+    last_entry = data[last_key]
+    
+    return last_entry
+    

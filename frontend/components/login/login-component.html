@@ -1,0 +1,58 @@
+<div class="login-container">
+  <h1>BITTYBOT</h1>
+  <p>Currently trained on 10,000 data points starting from August 1s,2023</p>
+  <button id="google-login-button">Login with Google</button>
+</div>
+
+<style>
+  .login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 25rem;
+    background-color: var(--primary);
+    border-radius: 15px;
+    border: 2px black solid;
+    background-image: linear-gradient(rgb(0 0 0/40%) 0 0);
+    padding: 2rem;
+    opacity: 0.9;
+  }
+
+  h1 {
+    margin-bottom: 20px;
+    color: var(--accent);
+  }
+
+  h2 {
+    color: var(--accent-2);
+  }
+
+  p {
+    text-align: center;
+    color: var(--secondary);
+  }
+
+  #google-login-button {
+    padding: 10px 20px;
+    background-color: #4285f4;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  #google-login-button:hover {
+    background-color: #357ae8;
+  }
+
+  .google-login-button:focus {
+    outline: none;
+  }
+
+  .google-login-button {
+    font-weight: bold;
+    color: var(--accent-2);
+  }
+</style>

@@ -1,0 +1,21 @@
+:root {
+    --primary: #003647;
+    --secondary: #6cb6b3;
+    --accent: #f2552c;
+    --accent-2: #e79631;
+    --main-font: 'Arial';
+}
+
+body {
+    margin: 0;
+    background-color: var(--primary);
+    font-family: var(--main-font);
+}
+
+h1 {
+    color: var(--primary)
+}
+
+p {
+    color: var(--secondary);
+}
