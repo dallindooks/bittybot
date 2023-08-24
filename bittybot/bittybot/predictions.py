@@ -43,14 +43,15 @@ def getCurrentBTC():
     return df
 
 def getRollingAvgs(data):
-    horizons = [1,3,5,20,60]
+    horizons = [1,2,3,4,5,6,7,8,9,10]
+
     global predictors
     predictors = []
     for horizon in horizons:
         rolling_averages = data.rolling(horizon).mean()
         
         ratio_column = f"Close_Ratio_{horizon}"
-        data[ratio_column] = data["c"] / rolling_averages["c"]
+        data[ratio_column] = data["Close"] / rolling_averages["Close"]
         
         trend_column = f"Trend_{horizon}"
         
@@ -71,14 +72,5 @@ def makePrediction():
     preds = model.predict_proba(data[predictors])[:,1]
     
     preds = pd.Series(preds, index=data.index, name="Predictions")
-    print(preds)
-    
-    fiveMinAgo = data.iloc[[-15]]
-    model.fit(fiveMinAgo[predictors], fiveMinAgo["Up"])
-    
-    with open(modelLink, 'wb') as file:
-        pickle.dump(model, file)
     return preds.iloc[[-1]]
-
-makePrediction()
     
