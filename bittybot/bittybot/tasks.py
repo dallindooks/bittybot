@@ -6,7 +6,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 scheduler = BlockingScheduler()
 
 def predictAndTrade():
-    print(evaluatePrediction(makePrediction()))
+    evaluatePrediction(makePrediction())
 
 
 def start():

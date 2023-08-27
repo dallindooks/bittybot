@@ -2,9 +2,6 @@ import datetime
 import json
 import os
 import pickle
-from alpaca.data.requests import CryptoBarsRequest
-from alpaca.data.timeframe import TimeFrame
-from alpaca.data.live import CryptoDataStream
 import dotenv
 import requests
 import pandas as pd
@@ -73,7 +70,7 @@ def getRollingAvgs(data):
         data[trend_column] = data.shift(1).rolling(horizon).sum()["Up"]
         predictors += [ratio_column, trend_column]
         
-    return data[-60:]
+    return data[-10:]
 
 def makePrediction():
     

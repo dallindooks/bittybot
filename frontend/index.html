@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Web Component Example</title>
+    <script defer src="./js/main.js" type="module"></script>
     <script defer src="./components/login/login-component.js" type="module"></script>
     <script defer src="./components/footer/footer-component.js" type="module"></script>
     <link rel="stylesheet" href="style.css">
@@ -11,37 +12,11 @@
   <body>
     <div class="cover">
         <div class="login-container">
-            <login-component>testing</login-component>
+            <login-component></login-component>
         </div>
     </div>
     <div class="footer">
         <footer-component></footer-component>
     </div>
-
-    <style>
-        body {
-            height: 100vh;
-        }
-
-        .cover {
-            width: 100%;
-            height: 100%;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-size: 60%;
-            background-image: url('assets/bitcoin-image.png');
-            background-repeat: no-repeat;
-            background-position: bottom right;
-        }
-
-       .footer {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-        } 
-
-    </style>
   </body>
 </html>
