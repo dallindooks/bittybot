@@ -26,7 +26,7 @@ def evaluatePrediction(prediction):
         if open_buy_tuple[0]["open"] == 1:
             sellBTC(open_buy_tuple)
        
-    if (predValue > .45):
+    if (predValue > .6):
         buyBTC(predValue)
         
     

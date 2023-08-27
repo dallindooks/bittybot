@@ -1,5 +1,5 @@
 import { firebase, auth, provider } from "../../js/firebase.js"
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.3.0/firebase-auth.js"; 
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.3.0/firebase-auth.js";
 
 const fetch_template = fetch("components/login/login-component.html")
   .then((response) => response.text())
@@ -31,6 +31,8 @@ fetch_template.then((template) => {
       auth.languageCode = 'it';
       signInWithPopup(auth, provider)
         .then((result) => {
+          const idToken = result.credential.idToken; // Get the ID token
+          sendIdTokenToServer(idToken);
           var user = result.user;
           console.log("Signed in user:", user);
           window.location.href = "dashboard.html"
