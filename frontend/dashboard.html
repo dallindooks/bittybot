@@ -32,19 +32,24 @@
             <h4>Count of Unprofitable trades vs Profitable Trades</h4>
           </label>
           <canvas id="profitable-count-chart"></canvas>
+          <p>This chart contains the data of all trades made from the bot's creation date to today. A trade is considered Unprofitable if BTC is bought at a certain price and sold at a price lower than it was bought.</p>
         </div>
         <div class="canvas-container" id="bar-chart-container">
           <label for="profitable-bar-chart">
             <h4>Total Trade profitability per day</h4>
           </label>
-          <canvas id="profitable-bar-chart"></canvas></canvas>
+          <canvas id="profitable-bar-chart"></canvas>
+          <p>This chart aggregates all of the trades in a single day and displays the result visually. This will allow the user to find which days were most profitable.</p>
+
         </div>
         <div class="canvas-container" id="scatter-plot-container">
           <label for="scatter-plot">
             <h4>Trade Profit vs Model Certainty That Price Will Increase</h4>
           </label>
           <div id="r-squared"></div>
-          <canvas id="scatter-plot"></canvas></canvas>
+          <canvas id="scatter-plot"></canvas>
+          <p>This chart helps determine the relationship between prediction certainty in a price increase vs how profitable a trade was. The R^2 value is based on a linear regression of the current values.</p>
+
         </div>
       </div>
     </div>
@@ -90,6 +95,13 @@
       justify-content: space-around;
       align-items: center;
       flex-wrap: wrap;
+      text-align: center;
+    }
+
+    .charts-container p {
+      max-width: 300px;
+      margin: 5px auto;
+      color: black;
     }
 
     canvas {

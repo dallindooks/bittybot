@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .tasks import start, pause
 from .trades import getLastBuy, sellBTC
-from .firebase import getDb
+from .firebase import getDb, getConfig
 import atexit
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -45,9 +45,18 @@ class startBot(APIView):
     def post(self, request, format=None):
         global botThread
         
+        config = getConfig()
+        firebase = pyrebase.initialize_app(config)
+        
         token = request.data.get('token')
+        auth = firebase.auth()
+        user = auth.get_account_info(token)  
+
+        # Extract the email from the user data
+        user_email = user["users"][0]["email"]
+        
         db = getDb()
-        if adminAuthVerify(token) == "authenticated":
+        if os.environ.get("ADMIN_AUTH_USER") == user_email:
         
             bot_run_ref = db.child("bot_running").update({"on": True})
             botThread = threading.Thread(target=start)
@@ -59,19 +68,30 @@ class startBot(APIView):
 class killBot(APIView):
     def post(self, request, format=None):
         
-        db = getDb()
+        config = getConfig()
+        firebase = pyrebase.initialize_app(config)
         
-        bot_run_ref = db.child("bot_running").update({"on": False})
-    
-        buy_ref = db.child("trades").get().val()
-        pause()
-        open_buy_tuple = getLastBuy()
-    
-        if open_buy_tuple:
-            if open_buy_tuple[0]["open"] == 1:
-                sellBTC(open_buy_tuple)
+        token = request.data.get('token')
+        auth = firebase.auth()
+        user = auth.get_account_info(token)  
+
+        # Extract the email from the user data
+        user_email = user["users"][0]["email"]
+        if os.environ.get("ADMIN_AUTH_USER") == user_email:
+            db = getDb()
+            
+            bot_run_ref = db.child("bot_running").update({"on": False})
+        
+            buy_ref = db.child("trades").get().val()
+            pause()
+            open_buy_tuple = getLastBuy()
+        
+            if open_buy_tuple:
+                if open_buy_tuple[0]["open"] == 1:
+                    sellBTC(open_buy_tuple)
                 
-        return Response("Bot Paused", status=status.HTTP_202_ACCEPTED)
+            return Response("Bot Paused", status=status.HTTP_202_ACCEPTED)
+        return Response("User not authenticated", status=status.HTTP_418_IM_A_TEAPOT)
 
 class profitableCount(APIView):   
     def get(self, request, start, format=None):
@@ -145,29 +165,3 @@ class botRunning(APIView):
         bot_ref = db.child("bot_running").child("on").get()
         return Response(bot_ref.val(), status=status.HTTP_200_OK)
     
-
-def adminAuthVerify(token):
-
-    id_token_str = token
-    
-    firebase = pyrebase.initialize_app(os.environ.get('FIREBASE_CONFIG'))
-    auth = firebase.auth()
-    
-    decoded_token = auth.verify_id_token(id_token_str)
-    user_email = decoded_token["email"]
-
-    try:
-        id_info = id_token.verify_oauth2_token(id_token_str, requests.Request(), "YOUR_GOOGLE_CLIENT_ID")
-        if user_email:
-            if user_email == os.environ.get("ADMIN_AUTH_USER"):
-                return "authenticated"
-    except ValueError as e:
-        return JsonResponse({"error": "Invalid ID token"}, status=400)
-    
-class saveToken(APIView):
-    def post(self, request, format=None):
-        global token
-        
-        token = request.data.get('token')
-        
-        return Response("token saved thnks", status=status.HTTP_200_OK)

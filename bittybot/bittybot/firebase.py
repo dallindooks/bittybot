@@ -18,5 +18,9 @@ def getDb():
   db = firebase.database()
   return db
 
+def getConfig():
+  global config
+  return config
+
 firebase = pyrebase.initialize_app(config)
 auth = firebase.auth()

@@ -1,11 +1,19 @@
 import { firebase, auth, provider, db } from "./firebase.js"
 
+let id_token = ''
 
 auth.onAuthStateChanged(function (user) {
+  console.log(user)
   if (!user) {
-    // User is signed in, redirect to a specific page
     window.location.href = "index.html";
   }
+  user.getIdToken()
+    .then(idToken => {
+      id_token = idToken
+    })
+    .catch(error => {
+      console.error("Error getting ID token:", error);
+    });
 });
 const chart = window.Chart
 
@@ -13,9 +21,6 @@ let start = "08-25-2023"
 const count_url = `http://127.0.0.1:8000/profitable-count/${start}`;
 const profit_url = `http://127.0.0.1:8000/profitabilities/${start}`;
 const profit_vs_certainty_url = `http://127.0.0.1:8000/profit-vs-certainty/${start}`
-
-console.log(auth)
-
 fetch(count_url)
   .then(function (response) {
     if (!response.ok) {
@@ -216,39 +221,47 @@ const createScatterPlot = (data) => {
 
 const startbot = () => {
   const url = "http://127.0.0.1:8000/startBot/"
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+  const payload = {
+    "token": id_token
+  }
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Response:", data);
+      getBotStatus()
     })
-      .then(response => response.json())
-      .then(data => {
-        console.log("Response:", data);
-        getBotStatus()
-      })
-      .catch(error => {
-        console.error("Error:", error);
-      });
+    .catch(error => {
+      console.error("Error:", error);
+    });
 }
 
 
 const killbot = () => {
   const url = "http://127.0.0.1:8000/killBot/"
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+  const payload = {
+    "token": id_token
+  }
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Response:", data);
+      getBotStatus()
     })
-      .then(response => response.json())
-      .then(data => {
-        console.log("Response:", data);
-        getBotStatus()
-      })
-      .catch(error => {
-        console.error("Error:", error);
-      });
+    .catch(error => {
+      console.error("Error:", error);
+    });
 }
 
 document.getElementById("start-button").addEventListener("click", startbot)
